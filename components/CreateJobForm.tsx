@@ -14,6 +14,10 @@ import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 
 import { CustomFormField, CustomFormSelect } from './FormComponents';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useToast } from './ui/use-toast';
+import { useRouter } from 'next/router';
+import { createJobAction } from '@/utils/actions';
 
 const CreateJobForm = () => {
   const form = useForm<CreateAndEditJobType>({
@@ -27,8 +31,17 @@ const CreateJobForm = () => {
     },
 
   });
+
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
+  const router = useRouter()
+  const { mutate, isPending } = useMutation({
+    mutationFn: (values: CreateAndEditJobType) => createJobAction(values),
+    onSuccess: (data) => {} 
+  })
+
   function onSubmit(values: CreateAndEditJobType) {
-    console.log(values)
+    mutate(values)
   }
   return (
     <Form {...form}>
@@ -40,7 +53,7 @@ const CreateJobForm = () => {
           <CustomFormField name='location' control={form.control} />
           <CustomFormSelect name='status' control={form.control} labelText='job status' items={Object.values(JobStatus)} />
           <CustomFormSelect name='mode' control={form.control} labelText='job mode' items={Object.values(JobMode)} />
-          <Button type='submit' className='self-end capitalize'>Create job</Button>
+          <Button type='submit' className='self-end capitalize' disabled={isPending}>{isPending ? "loading" : "Create job"}</Button>
         </div>
       </form>
     </Form>
